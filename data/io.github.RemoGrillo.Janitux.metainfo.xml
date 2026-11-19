@@ -4,17 +4,20 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <name>Janitux</name>
-  <summary>Find out what is eating your disk</summary>
-  <summary xml:lang="it">Scopri cosa occupa il tuo disco</summary>
+  <summary>Investigate what fills your disk</summary>
+  <summary xml:lang="it">Indaga su cosa riempie il disco</summary>
   <description>
     <p>
-      Janitux scans a folder or a whole disk and shows everything in it sorted
-      by size, biggest first, at every level. Walk the tree column by column,
-      see where the space goes, and move what you no longer need to the trash.
+      Every full disk has a culprit. Janitux, the disk janitor, scans a folder
+      or a whole disk and names the main suspects right away: huge single
+      files, big folders buried deep, caches and forgotten leftovers. Then walk
+      the tree column by column, always sorted by size, and move what you no
+      longer need to the trash.
     </p>
     <ul>
+      <li>Main suspects, ranked with a TF-IDF-like score, with the clues against each one</li>
       <li>Column browser: each folder opens to the right, always sorted by size</li>
-      <li>Interactive sunburst and treemap of the selected folder</li>
+      <li>Interactive treemap and sunburst of the selected folder</li>
       <li>Breakdown by kind of content: video, images, audio, archives, code…</li>
       <li>Moves to the trash by default; permanent deletion asks first</li>
       <li>Fast multi-threaded scan, hard links counted once</li>
@@ -29,12 +32,16 @@
   <url type="vcs-browser">https://github.com/RemoGrillo/janitux</url>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/RemoGrillo/janitux/main/docs/screenshots/sunburst.png</image>
-      <caption>Columns sorted by size, with the sunburst of the selected folder</caption>
+      <image>https://raw.githubusercontent.com/RemoGrillo/janitux/main/docs/screenshots/suspects.png</image>
+      <caption>The main suspects, right after the scan</caption>
     </screenshot>
     <screenshot>
       <image>https://raw.githubusercontent.com/RemoGrillo/janitux/main/docs/screenshots/treemap.png</image>
-      <caption>Treemap view</caption>
+      <caption>Columns sorted by size, with the treemap of the selected folder</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/RemoGrillo/janitux/main/docs/screenshots/sunburst.png</image>
+      <caption>Sunburst view, light theme</caption>
     </screenshot>
     <screenshot>
       <image>https://raw.githubusercontent.com/RemoGrillo/janitux/main/docs/screenshots/start.png</image>
@@ -54,6 +61,16 @@
     <color type="primary" scheme_preference="dark">#184f95</color>
   </branding>
   <releases>
+    <release version="0.2.0" date="2026-11-19">
+      <description>
+        <ul>
+          <li>Main suspects: the items most likely filling the disk, shown right after the scan</li>
+          <li>The treemap is the default chart; the deepest column fills the free space</li>
+          <li>New janitor penguin icon</li>
+          <li>No more pause right after scanning big trees</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-11-19">
       <description>
         <p>First release.</p>

@@ -5,9 +5,10 @@ import os
 from gi.repository import Adw, Gio, GLib, Gtk, Pango
 
 from . import kinds
-from .charts import Sunburst, Treemap, rect, rgba, rounded_rect
+from .charts import Chart, Sunburst, Treemap, rect, rgba, rounded_rect
 from .common import display_name, icon_for, palette, percent, size_text
 from .i18n import _
+from .lineup import Lineup
 
 
 class KindBar(Gtk.Widget):
@@ -72,17 +73,20 @@ class Inspector(Gtk.Box):
                          margin_top=12, margin_bottom=12, margin_start=12, margin_end=12)
         self.set_size_request(360, -1)
 
-        self.sunburst = Sunburst(on_navigate, self._on_hover)
+        # The suspects come first: they are the answer to "what is eating my disk".
+        self.lineup = Lineup(on_navigate)
         self.treemap = Treemap(on_navigate, self._on_hover)
-        self.charts = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE, vexpand=True)
-        self.charts.add_titled(self.sunburst, "sunburst", _("Sunburst"))
-        self.charts.add_titled(self.treemap, "treemap", _("Treemap"))
-        self.charts.connect("notify::visible-child", lambda *_a: self._update_chart())
-        switcher = Gtk.StackSwitcher(stack=self.charts, halign=Gtk.Align.CENTER)
+        self.sunburst = Sunburst(on_navigate, self._on_hover)
+        self.views = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE, vexpand=True)
+        self.views.add_titled(self.lineup, "suspects", _("Suspects"))
+        self.views.add_titled(self.treemap, "treemap", _("Treemap"))
+        self.views.add_titled(self.sunburst, "sunburst", _("Sunburst"))
+        self.views.connect("notify::visible-child", lambda *_a: self._update_chart())
+        switcher = Gtk.StackSwitcher(stack=self.views, halign=Gtk.Align.CENTER)
         self.caption = Gtk.Label(css_classes=["caption", "dim-label"],
                                  ellipsize=Pango.EllipsizeMode.MIDDLE)
         self.append(switcher)
-        self.append(self.charts)
+        self.append(self.views)
         self.append(self.caption)
         self.append(Gtk.Separator())
 
@@ -133,10 +137,18 @@ class Inspector(Gtk.Box):
         Adw.StyleManager.get_default().connect(
             "notify::dark", lambda *_a: self.selected and self._update_details())
 
+    def investigate(self, root):
+        """A new scan (or a changed tree): rank the suspects again."""
+        self.lineup.investigate(root)
+
+    def show_suspects(self):
+        self.views.set_visible_child(self.lineup)
+
     def show(self, root, selected):
         self.root = root
         self.selected = selected
         self.focus = selected if selected.is_dir else selected.parent
+        self.lineup.mark(selected)
         self._update_chart()
         self._update_details()
 
@@ -145,8 +157,11 @@ class Inspector(Gtk.Box):
         self.treemap.refresh()
 
     def _update_chart(self):
-        if self.focus is not None:
-            self.charts.get_visible_child().show(self.focus, self.selected)
+        view = self.views.get_visible_child()
+        is_chart = isinstance(view, Chart)
+        if is_chart and self.focus is not None:
+            view.show(self.focus, self.selected)
+        self.caption.set_visible(is_chart)
         self._on_hover(None)
 
     def _on_hover(self, node):

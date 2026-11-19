@@ -4,9 +4,9 @@
 # working tree (makepkg finds the local tarball first and skips the checksum).
 
 pkgname=janitux
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=1
-pkgdesc="Find out what is eating your disk: size-sorted column browser, sunburst and treemap"
+pkgdesc="Disk janitor: finds the main suspects filling your disk, with size-sorted columns, treemap and sunburst"
 arch=(any)
 url="https://github.com/RemoGrillo/janitux"
 license=(GPL-3.0-or-later)

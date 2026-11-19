@@ -8,9 +8,10 @@ root to the current item is always visible left to right.
 from gi.repository import Gdk, GLib, Graphene, Gtk, Pango
 
 from .charts import rect, rgba
-from .common import color_of, icon_for, is_cache, percent, size_text
+from .common import color_of, icon_for, percent, size_text
 from .i18n import _
 from .scanner import OTHER_FS, UNREADABLE
+from .suspects import is_cache
 
 
 class ShareBar(Gtk.Widget):
@@ -199,6 +200,7 @@ class ColumnBrowser(Gtk.ScrolledWindow):
         column = Column(self, folder)
         self.box.append(column)
         self.columns.append(column)
+        self._stretch_last()
 
     def _truncate(self, index):
         """Remove every column after position `index` (-1: all)."""
@@ -208,6 +210,12 @@ class ColumnBrowser(Gtk.ScrolledWindow):
             self.box.remove(column)
             if separator is not None:
                 self.box.remove(separator)
+        self._stretch_last()
+
+    def _stretch_last(self):
+        """The deepest column takes whatever room is left: no empty gap."""
+        for i, column in enumerate(self.columns):
+            column.set_hexpand(i == len(self.columns) - 1)
 
     def _show_last_column(self, adjustment):
         # The viewport is still configuring the adjustment: scroll right after.

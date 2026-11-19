@@ -13,7 +13,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gdk, Gio, Gtk  # noqa: E402
 
 from . import APP_ID, WEBSITE, __version__  # noqa: E402
-from .i18n import _  # noqa: E402
+from .i18n import TAGLINE  # noqa: E402
 
 MIN_GTK = (4, 14)
 MIN_ADW = (1, 5)
@@ -60,7 +60,7 @@ class Application(Adw.Application):
     def _about(self):
         Adw.AboutDialog(
             application_name="Janitux", application_icon=APP_ID, version=__version__,
-            comments=_("Find out what is eating your disk"),
+            comments=TAGLINE,
             license_type=Gtk.License.GPL_3_0,
             developer_name="Remo Grillo", website=WEBSITE, issue_url=WEBSITE + "/issues",
         ).present(self.get_active_window())

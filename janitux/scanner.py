@@ -149,6 +149,10 @@ class Scanner:
             if self.cancelled:
                 return None
             finalize(root)
+            # Keep the tree out of the collector's sight for good: one full
+            # pass over a million nodes is a half-second freeze of the UI.
+            # Trees are freed by reference counting instead (see release()).
+            gc.freeze()
         finally:
             if gc_was_enabled:
                 gc.enable()
@@ -255,12 +259,26 @@ def _propagate(start, d_size, d_count, d_kinds):
         node = node.parent
 
 
+def release(node):
+    """Drop the parent links of a subtree that is no longer needed.
+
+    Scanned trees are frozen out of the garbage collector (Scanner.run), and
+    child -> parent links make cycles: breaking them lets plain reference
+    counting free the nodes."""
+    stack = [node]
+    while stack:
+        current = stack.pop()
+        current.parent = None
+        if current.children:
+            stack.extend(current.children)
+
+
 def detach(node):
     """Remove a node from the tree after it was deleted from disk."""
     parent = node.parent
     parent.children.remove(node)
     _propagate(parent, -node.size, -node.count, [-v for v in node.kind_vector()])
-    node.parent = None
+    release(node)
 
 
 def replace(old, new):
@@ -276,4 +294,5 @@ def replace(old, new):
     old_kinds, new_kinds = old.kind_vector(), new.kind_vector()
     _propagate(parent, new.size - old.size, new.count - old.count,
                [b - a for a, b in zip(old_kinds, new_kinds)])
+    release(old)
     return new

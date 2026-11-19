@@ -11,7 +11,7 @@ from .common import size_text
 from .i18n import _
 from .inspector import Inspector
 from .pages import ScanPage, StartPage, header_with_menu
-from .scanner import Scanner, detach, replace
+from .scanner import Scanner, detach, release, replace
 
 CSS = """
 .badge { font-size: 0.75em; font-weight: bold; padding: 0 6px; border-radius: 99px;
@@ -83,7 +83,7 @@ class Window(Adw.ApplicationWindow):
         self.inspector = Inspector(self._navigate)
         paned = Gtk.Paned(start_child=self.columns, end_child=self.inspector,
                           resize_start_child=True, resize_end_child=False,
-                          shrink_start_child=False, shrink_end_child=False, position=700)
+                          shrink_start_child=False, shrink_end_child=False, position=600)
         view = Adw.ToolbarView(content=paned)
         view.add_top_bar(header)
 
@@ -135,12 +135,18 @@ class Window(Adw.ApplicationWindow):
         # Rescanning the same folder keeps the current selection if it still exists.
         same = self.root is not None and self.root.path() == root.path()
         target = _find(root, self.selected.path()) if same and self.selected else root
-        self.root = root
+        old, self.root = self.root, root
         if not same:
             self.freed = 0
         self.columns.set_root(root)
+        self.inspector.investigate(root)
+        if not same:
+            self.inspector.show_suspects()
         self.pages.set_visible_child_name("results")
         self.columns.reveal(target)
+        if old is not None:  # let the previous tree go, without blocking the UI
+            threading.Thread(target=release, args=(old,), daemon=True).start()
+            del old
         if scanner.errors:
             self.toast(_("{n} folders could not be read").format(n=scanner.errors))
 
@@ -364,6 +370,7 @@ class Window(Adw.ApplicationWindow):
     def _rebuild(self, select):
         """Rebuild the views after the tree changed; select `select`."""
         self.inspector.refresh()
+        self.inspector.investigate(self.root)
         self.columns.set_root(self.root)
         self.columns.reveal(select)
 

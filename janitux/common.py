@@ -8,13 +8,6 @@ from gi.repository import Adw, GLib
 from . import kinds
 from .scanner import OTHER_FS, SYMLINK, UNREADABLE
 
-# Folder names that only hold regenerable data: safe cleaning candidates.
-CACHE_NAMES = frozenset((
-    ".cache", "cache", "Cache", "caches", "Caches", "CachedData", "GPUCache",
-    "Code Cache", "ShaderCache", "thumbnails", "node_modules", "__pycache__",
-    ".pytest_cache", ".mypy_cache", ".ruff_cache", ".npm", ".gradle", ".ccache",
-))
-
 
 def palette():
     dark = Adw.StyleManager.get_default().get_dark()
@@ -41,10 +34,6 @@ def display_name(node):
     if node.parent is None:
         return os.path.basename(node.name.rstrip("/")) or node.name
     return node.name
-
-
-def is_cache(node):
-    return node.is_dir and node.name in CACHE_NAMES
 
 
 def icon_for(node):

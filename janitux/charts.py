@@ -466,7 +466,7 @@ class Treemap(Chart):
                 snapshot.push_clip(rect(x, y, w, self.HEADER))
                 size_markup = f"<span size='small'>{size}</span>"
                 size_width = self.measure(size_markup)
-                if size_width + 40 <= w - 12:  # room for the size and some name
+                if size_width + 70 <= w - 12:  # room for the size and a readable name
                     self.number(snapshot, size_markup, x + w - 6 - size_width, y + 1,
                                 size_width, ink)
                     name_width = w - 12 - size_width - 8

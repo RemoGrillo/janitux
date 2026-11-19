@@ -4,7 +4,7 @@
 
 # Janitux
 
-**Find out what is eating your disk.**
+**Every full disk has a culprit. The janitor is on the case.**
 
 [![Build](https://github.com/RemoGrillo/janitux/actions/workflows/build.yml/badge.svg)](https://github.com/RemoGrillo/janitux/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/RemoGrillo/janitux?color=3987e5)](https://github.com/RemoGrillo/janitux/releases/latest)
@@ -17,27 +17,29 @@
 
 </div>
 
-Janitux scans a folder or a whole disk and shows everything in it **sorted by
-size, biggest first, at every level**, the way OmniDiskSweeper does on the Mac.
-Open a folder and its contents appear in the next column; next to the columns,
-an interactive **sunburst** or **treemap** shows where the space goes. When you
-find something you don't need, move it to the trash.
+Janitux is a disk janitor that investigates. Point it at a folder or a whole
+disk and, as soon as the scan ends, it names the **main suspects**: huge
+single files, big folders buried deep in the tree, caches and forgotten
+leftovers, each with the clues against it. Then follow the trail in columns
+**sorted by size, biggest first, at every level** (the OmniDiskSweeper way),
+look at the **treemap**, and move the culprits to the trash.
 
-![Janitux: columns sorted by size and a sunburst of the home folder](docs/screenshots/sunburst.png)
+![Janitux: the main suspects of a home folder, right after the scan](docs/screenshots/suspects.png)
 
 ## Features
 
+- **Main suspects**: a ranked list of what most likely fills your disk, with clues ("single file", "9 levels deep", "untouched for 3 years", "rebuildable cache"…).
 - **Columns sorted by size**: always biggest first, at every depth.
-- **Sunburst and treemap** of the selected folder. Hover to highlight, click to zoom in.
+- **Treemap and sunburst** of the selected folder. Hover to highlight, click to zoom in.
 - **Colors by content**: video, images, audio, archives, documents, code, programs, with a breakdown for every folder.
 - **Safe cleaning**: Delete moves to the trash, Shift+Delete deletes for good (it always asks first).
 - **Quick hints**: a `cache` badge marks folders that only hold rebuildable data (`.cache`, `node_modules`, `__pycache__`…).
 - **Fast and light**: about 250 000 files a second, sizes identical to `du`, hard links counted once. Dependencies: GTK and nothing else.
 - English and Italian.
 
-| Treemap | Light theme |
+| Treemap | Sunburst, light theme |
 |---|---|
-| ![Treemap view](docs/screenshots/treemap.png) | ![Light theme](docs/screenshots/light.png) |
+| ![Treemap view](docs/screenshots/treemap.png) | ![Sunburst view in the light theme](docs/screenshots/sunburst.png) |
 
 <details>
 <summary>Start page: every disk and how full it is</summary>
@@ -45,6 +47,28 @@ find something you don't need, move it to the trash.
 ![Start page](docs/screenshots/start.png)
 
 </details>
+
+## How the suspects are found
+
+Every item of at least 0.5% of the scan (between 10 MB and 1 GB) gets a
+suspicion score built like [TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf):
+
+```
+suspicion(x) = share(x) · ln(1 + N / files(x)) · √depth(x) · bonus(x)
+```
+
+| Term | Meaning |
+|---|---|
+| `share(x)` | fraction of the scanned space taken by `x`: the *term frequency* |
+| `ln(1 + N / files(x))` | how concentrated `x` is: the *inverse document frequency*. `N` is the number of files in the scan, `files(x)` the files inside `x` (1 for a file). A huge single file scores highest; a top folder holding half of everything barely counts |
+| `√depth(x)` | levels below `/`: big things buried deep are the ones nobody remembers |
+| `bonus(x)` | ×2 for rebuildable caches and for what is already in the trash |
+
+Suspects are then picked greedily, *explaining away*: once an item is picked,
+its contents leave the race and its size is subtracted from the folders above
+it, which are scored again on what is left. So the list never repeats itself,
+and the sizes add up to the space it explains. The code is short and tested:
+[`janitux/suspects.py`](janitux/suspects.py).
 
 ## Install
 
@@ -99,6 +123,8 @@ libadwaita 1.5), and every `v*` tag publishes all the packages as a release.
 | File | Role |
 |---|---|
 | `janitux/scanner.py` | the scan and the size tree (no GUI code, unit tested) |
+| `janitux/suspects.py` | the main-suspects ranking (no GUI code, unit tested) |
+| `janitux/lineup.py` | the list of suspects and their clues |
 | `janitux/columns.py` | the column browser |
 | `janitux/charts.py` | sunburst and squarified treemap, drawn with GTK snapshots (GPU) |
 | `janitux/inspector.py` | side panel: charts, details, breakdown, actions |

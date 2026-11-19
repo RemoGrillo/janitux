@@ -10,16 +10,20 @@ on:
 permissions:
   contents: read
 
+env:
+  # Ubuntu mirrors hiccup now and then: retry downloads instead of failing.
+  APT: sudo apt-get -o Acquire::Retries=5
+
 jobs:
   test:
     name: Tests on the oldest supported stack (Ubuntu 24.04, GTK 4.14, libadwaita 1.5)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          $APT update
+          $APT install -y --no-install-recommends \
             python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 desktop-file-utils appstream xvfb dbus-bin
       - name: Unit tests and metadata validation
         run: make check
@@ -40,7 +44,7 @@ jobs:
     needs: test
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install nfpm
         run: |
           curl -sSfLO https://github.com/goreleaser/nfpm/releases/download/v2.48.0/nfpm_2.48.0_Linux_x86_64.tar.gz
@@ -51,11 +55,11 @@ jobs:
         run: make deb rpm pyz dist NFPM=./nfpm
       - name: Install and run the .deb
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ./dist/janitux_*_all.deb
+          $APT update
+          $APT install -y ./dist/janitux_*_all.deb
           test -x /usr/bin/janitux
           python3 -c 'import sys; sys.path.insert(0, "/usr/share/janitux"); import janitux.window'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: packages
           path: dist/*
@@ -68,7 +72,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: pacman -Syu --noconfirm --needed python python-gobject gtk4 libadwaita
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build with makepkg
         run: |
           useradd -m builder
@@ -76,7 +80,7 @@ jobs:
           su builder -c "make arch"
       - name: Install the package
         run: pacman -U --noconfirm dist/janitux-*-any.pkg.tar.zst && test -x /usr/bin/janitux
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: arch
           path: dist/*.pkg.tar.zst
@@ -86,15 +90,15 @@ jobs:
     needs: test
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install flatpak-builder
         run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder
+          $APT update
+          $APT install -y flatpak flatpak-builder
           flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
       - name: Build
         run: make flatpak
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: flatpak
           path: dist/*.flatpak
@@ -107,12 +111,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Tag must match the version in the code
         run: |
           version=$(sed -n 's/^__version__ = "\(.*\)"/\1/p' janitux/__init__.py)
           [ "v$version" = "$GITHUB_REF_NAME" ] || { echo "::error::tag $GITHUB_REF_NAME but code says $version"; exit 1; }
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true

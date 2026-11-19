@@ -1,31 +1,62 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#3a3a42"/>
-      <stop offset="1" stop-color="#1e1e24"/>
-    </linearGradient>
-    <linearGradient id="hole" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#d9d9e0"/>
+      <stop offset="1" stop-color="#e3e9f2"/>
     </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a4152"/>
+      <stop offset="1" stop-color="#14171f"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2fd39a"/>
+      <stop offset="1" stop-color="#16996a"/>
+    </linearGradient>
+    <radialGradient id="lens" cx="0.35" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#9ec5f4" stop-opacity="0.35"/>
+    </radialGradient>
   </defs>
   <rect x="6" y="6" width="116" height="116" rx="26" fill="url(#bg)"/>
-  <rect x="6.5" y="6.5" width="115" height="115" rx="25.5" fill="none" stroke="#ffffff" stroke-opacity="0.08"/>
-  <path d="M65.95 31.06A33 33 0 0 1 87.98 86.68L79.26 78.43A21 21 0 0 0 65.24 43.04Z" fill="#3987e5" opacity="1"/>
-  <path d="M85.13 89.35A33 33 0 0 1 42.87 89.35L50.56 80.13A21 21 0 0 0 77.44 80.13Z" fill="#eda100" opacity="1"/>
-  <path d="M40.02 86.68A33 33 0 0 1 32.07 55.68L43.68 58.70A21 21 0 0 0 48.74 78.43Z" fill="#eb6834" opacity="1"/>
-  <path d="M33.27 51.96A33 33 0 0 1 46.42 36.07L52.81 46.23A21 21 0 0 0 44.45 56.34Z" fill="#1baf7a" opacity="1"/>
-  <path d="M49.84 34.19A33 33 0 0 1 62.05 31.06L62.76 43.04A21 21 0 0 0 54.99 45.03Z" fill="#9085e9" opacity="1"/>
-  <path d="M65.80 19.04A45 45 0 0 1 107.83 53.81L98.09 56.07A35 35 0 0 0 65.40 29.03Z" fill="#3987e5" opacity="0.92"/>
-  <path d="M108.50 57.34A45 45 0 0 1 104.27 84.08L95.32 79.62A35 35 0 0 0 98.61 58.82Z" fill="#3987e5" opacity="0.92"/>
-  <path d="M93.47 98.01A45 45 0 0 1 51.82 107.32L54.52 97.69A35 35 0 0 0 86.92 90.45Z" fill="#eda100" opacity="0.92"/>
-  <path d="M31.91 95.55A45 45 0 0 1 20.17 74.19L29.91 71.93A35 35 0 0 0 39.04 88.54Z" fill="#eb6834" opacity="0.92"/>
-  <path d="M19.50 70.66A45 45 0 0 1 19.50 57.34L29.39 58.82A35 35 0 0 0 29.39 69.18Z" fill="#eb6834" opacity="0.92"/>
-  <path d="M21.79 48.39A45 45 0 0 1 29.99 34.53L37.55 41.08A35 35 0 0 0 31.17 51.86Z" fill="#1baf7a" opacity="0.92"/>
-  <path d="M43.92 23.73A45 45 0 0 1 53.81 20.17L56.07 29.91A35 35 0 0 0 48.38 32.68Z" fill="#9085e9" opacity="0.92"/>
-  <path d="M65.71 10.03A54 54 0 0 1 104.50 28.28L99.25 32.91A47 47 0 0 0 65.49 17.02Z" fill="#3987e5" opacity="0.8"/>
-  <path d="M99.70 104.52A54 54 0 0 1 75.79 116.70L74.26 109.87A47 47 0 0 0 95.07 99.26Z" fill="#eda100" opacity="0.8"/>
-  <path d="M25.81 102.17A54 54 0 0 1 15.89 88.53L22.13 85.35A47 47 0 0 0 30.76 97.23Z" fill="#eb6834" opacity="0.8"/>
-  <circle cx="64" cy="64" r="17" fill="url(#hole)"/>
-  <path d="M57 58.5h14M59.5 58.5l1 12h7l1-12M62 56.5h4" fill="none" stroke="#1e1e24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="6.5" y="6.5" width="115" height="115" rx="25.5" fill="none" stroke="#14171f" stroke-opacity="0.12"/>
+  <g opacity="0.95">
+    <path d="M65.64 11.03A53 53 0 0 1 113.88 46.07L105.41 49.12A44 44 0 0 0 65.36 20.02Z" fill="#3987e5"/>
+    <path d="M114.89 49.19A53 53 0 0 1 111.21 88.08L103.19 83.99A44 44 0 0 0 106.25 51.70Z" fill="#9085e9"/>
+    <path d="M109.63 90.96A53 53 0 0 1 65.64 116.97L65.36 107.98A44 44 0 0 0 101.88 86.38Z" fill="#1baf7a"/>
+    <path d="M62.36 116.97A53 53 0 0 1 20.15 93.77L27.60 88.71A44 44 0 0 0 62.64 107.98Z" fill="#eda100"/>
+    <path d="M18.39 91.00A53 53 0 0 1 13.11 49.19L21.75 51.70A44 44 0 0 0 26.14 86.42Z" fill="#eb6834"/>
+    <path d="M14.12 46.07A53 53 0 0 1 31.54 22.11L37.05 29.22A44 44 0 0 0 22.59 49.12Z" fill="#e87ba4"/>
+    <path d="M34.19 20.18A53 53 0 0 1 62.36 11.03L62.64 20.02A44 44 0 0 0 39.25 27.62Z" fill="#0ca30c"/>
+  </g>
+  <ellipse cx="64" cy="113" rx="28" ry="4.5" fill="#14171f" opacity="0.18"/>
+  <!-- broom handle (behind the flipper that holds it) -->
+  <path d="M108 20L82 101" stroke="#b9783a" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- penguin -->
+  <ellipse cx="64" cy="81" rx="28" ry="30" fill="url(#body)"/>
+  <circle cx="64" cy="49" r="22" fill="url(#body)"/>
+  <ellipse cx="64" cy="86" rx="19.5" ry="23" fill="#fff8e7"/>
+  <path d="M64 61c-9 0-16-4-16-11 0-6 4-9.5 8.5-9.5 3.4 0 5.6 1.8 7.5 4 1.9-2.2 4.1-4 7.5-4 4.5 0 8.5 3.5 8.5 9.5 0 7-7 11-16 11z" fill="#fff8e7"/>
+  <circle cx="57" cy="49.5" r="3.4" fill="#14171f"/><circle cx="71" cy="49.5" r="3.4" fill="#14171f"/>
+  <circle cx="58.2" cy="48.3" r="1.1" fill="#fff"/><circle cx="72.2" cy="48.3" r="1.1" fill="#fff"/>
+  <ellipse cx="51.5" cy="56" rx="3" ry="1.8" fill="#e87ba4" opacity="0.75"/>
+  <ellipse cx="76.5" cy="56" rx="3" ry="1.8" fill="#e87ba4" opacity="0.75"/>
+  <path d="M57.5 55.5Q64 51 70.5 55.5Q64 61.5 57.5 55.5Z" fill="#f7a21b"/>
+  <path d="M58.5 56.2Q64 58.6 69.5 56.2" fill="none" stroke="#c97c0a" stroke-width="0.9" stroke-linecap="round"/>
+  <!-- janitor cap -->
+  <path d="M43.5 39C43.5 24 84.5 24 84.5 39Z" fill="url(#cap)"/>
+  <ellipse cx="64" cy="39.5" rx="23" ry="4.2" fill="#118358"/>
+  <rect x="58" y="29" width="12" height="6" rx="2" fill="#fff8e7" opacity="0.9"/>
+  <path d="M61 32h6" stroke="#118358" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- feet -->
+  <ellipse cx="53" cy="110.5" rx="9" ry="4.3" fill="#f7a21b"/>
+  <ellipse cx="75" cy="110.5" rx="9" ry="4.3" fill="#f7a21b"/>
+  <!-- broom head -->
+  <polygon points="77.7,99.6 86.3,102.4 88.2,120.9 65.4,113.5" fill="#eda100"/>
+  <g stroke="#b97f00" stroke-width="1" stroke-linecap="round"><path d="M85.5 103.2L84.7 118.7"/><path d="M83.6 102.6L80.9 117.5"/><path d="M81.7 102.0L77.1 116.2"/><path d="M79.8 101.3L73.3 115.0"/><path d="M77.9 100.7L69.5 113.8"/></g>
+  <polygon points="77.4,97.4 87.8,100.8 86.6,104.6 76.2,101.2" fill="#e34948"/>
+  <!-- flippers: right one grips the broom, left one holds a magnifying glass -->
+  <ellipse cx="91" cy="73" rx="6.5" ry="14" transform="rotate(-38 91 73)" fill="#1d212b"/>
+  <path d="M30.5 96.5L23 104" stroke="#b9783a" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="38" cy="80" rx="6.5" ry="14" transform="rotate(32 38 80)" fill="#1d212b"/>
+  <circle cx="34.5" cy="91" r="8.5" fill="url(#lens)" stroke="#e9ecf2" stroke-width="3"/>
 </svg>

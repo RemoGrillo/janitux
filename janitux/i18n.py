@@ -5,7 +5,8 @@ import os
 
 IT = {
     # start page
-    "Find out what is eating your disk": "Scopri cosa occupa il tuo disco",
+    "Every full disk has a culprit. The janitor is on the case.":
+        "Ogni disco pieno ha un colpevole. Il bidello indaga.",
     "Locations": "Posizioni",
     "Home folder": "Cartella personale",
     "Choose a folder…": "Scegli una cartella…",
@@ -14,7 +15,7 @@ IT = {
     "Skip other disks and mounts found inside the folder": "Salta altri dischi e mount trovati dentro la cartella",
     "{free} free of {total}": "{free} liberi su {total}",
     # scanning
-    "Scanning…": "Scansione…",
+    "Investigating…": "Indagine in corso…",
     "Cancel": "Annulla",
     "{n} files": "{n} file",
     # results
@@ -49,6 +50,21 @@ IT = {
     "Could not move to trash": "Impossibile spostare nel cestino",
     "Some items could not be deleted": "Alcuni elementi non sono stati eliminati",
     "Path copied": "Percorso copiato",
+    # suspects
+    "Suspects": "Sospettati",
+    "Main suspects": "I principali sospettati",
+    "{n} suspects hold {size}, {pct} of the scanned space":
+        "{n} sospettati occupano {size}, il {pct} dello spazio analizzato",
+    "No suspects: nothing here is big enough to worry about.":
+        "Nessun sospettato: qui niente è abbastanza grande da preoccupare.",
+    "already in the trash": "già nel cestino",
+    "rebuildable cache": "cache rigenerabile",
+    "single file": "file singolo",
+    "mostly {kind}": "soprattutto {kind}",
+    "{n} levels deep": "a {n} livelli di profondità",
+    "untouched for {n} months": "fermo da {n} mesi",
+    "untouched for {n} years": "fermo da {n} anni",
+    "needs admin rights": "servono i permessi di amministratore",
     # file kinds
     "Video": "Video",
     "Images": "Immagini",
@@ -76,3 +92,6 @@ _catalog = CATALOGS.get(_language(), {})
 
 def _(text: str) -> str:
     return _catalog.get(text, text)
+
+
+TAGLINE = _("Every full disk has a culprit. The janitor is on the case.")

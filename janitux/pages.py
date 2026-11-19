@@ -7,7 +7,7 @@ from gi.repository import Adw, GLib, Gtk, Pango
 
 from . import APP_ID
 from .common import size_text
-from .i18n import _
+from .i18n import TAGLINE, _
 
 SKIP_MOUNTS = ("/boot", "/efi", "/snap/", "/var/lib/snapd")
 
@@ -99,7 +99,7 @@ class StartPage(Adw.Bin):
         theme = Gtk.IconTheme.get_for_display(self.get_display())
         status = Adw.StatusPage(
             icon_name=APP_ID if theme.has_icon(APP_ID) else "drive-harddisk-symbolic",
-            title="Janitux", description=_("Find out what is eating your disk"),
+            title="Janitux", description=TAGLINE,
             child=Adw.Clamp(maximum_size=600, child=box))
         view.set_content(status)
         self._rows = []
@@ -157,7 +157,7 @@ class ScanPage(Adw.Bin):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         for widget in (self.size, self.files, self.current, cancel):
             box.append(widget)
-        self.status = Adw.StatusPage(title=_("Scanning…"), child=box)
+        self.status = Adw.StatusPage(title=_("Investigating…"), child=box)
         if hasattr(Adw, "SpinnerPaintable"):  # libadwaita >= 1.6
             self.status.set_paintable(Adw.SpinnerPaintable.new(self.status))
         else:
