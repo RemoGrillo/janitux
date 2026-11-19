@@ -6,11 +6,13 @@ import threading
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
+from .activity import ActivityLog, HeaderTitle
 from .columns import ColumnBrowser
 from .common import size_text
-from .i18n import _
+from .i18n import _, plural
 from .inspector import Inspector
 from .pages import ScanPage, StartPage, header_with_menu
+from .places import empty_trash, measure_trash, trash_dirs
 from .scanner import Scanner, detach, release, replace
 
 CSS = """
@@ -19,6 +21,10 @@ CSS = """
 levelbar.disk-usage block.roomy { background-color: @accent_bg_color; }
 levelbar.disk-usage block.filling { background-color: @warning_bg_color; }
 levelbar.disk-usage block.crowded { background-color: @error_bg_color; }
+.activity-count { font-size: 0.65em; font-weight: bold; min-width: 1.4em; padding: 0 2px;
+                  border-radius: 99px; margin: -5px -7px 0 0;
+                  background: @accent_bg_color; color: @accent_fg_color; }
+.header-message { font-weight: bold; color: @accent_color; }
 """
 
 SHORTCUTS = {
@@ -41,17 +47,18 @@ class Window(Adw.ApplicationWindow):
         self.root = None
         self.selected = None
         self.scanner = None
-        self.freed = 0
+        self.trashed = 0   # moved to the trash this session: still on disk
+        self.freed = 0     # really gone: deleted, or trash emptied
         self.busy = False
+        self.log = ActivityLog()
 
-        self.start_page = StartPage(self.scan, self._choose_folder)
+        self.start_page = StartPage(self.scan, self._choose_folder, self.log)
         self.scan_page = ScanPage(self._cancel_scan)
         self.pages = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE)
         self.pages.add_named(self.start_page, "start")
         self.pages.add_named(self.scan_page, "scan")
         self.pages.add_named(self._build_results(), "results")
-        self.toasts = Adw.ToastOverlay(child=self.pages)
-        self.set_content(self.toasts)
+        self.set_content(self.pages)
 
         for name, callback in (
             ("trash", self._trash), ("delete", self._confirm_delete),
@@ -59,6 +66,7 @@ class Window(Adw.ApplicationWindow):
             ("copy-path", self._copy_path), ("up", self._up),
             ("rescan", lambda: self.scan(self.root.path())),
             ("rescan-folder", self._rescan_folder), ("new-scan", self._new_scan),
+            ("empty-trash", self._ask_empty_trash),
         ):
             action = Gio.SimpleAction(name=name)
             action.connect("activate", lambda _a, _p, cb=callback: cb())
@@ -71,13 +79,12 @@ class Window(Adw.ApplicationWindow):
 
     # -- layout -------------------------------------------------------------
     def _build_results(self):
-        header = header_with_menu()
+        self.title = HeaderTitle("Janitux")
+        header = header_with_menu(self.log, self.title)
         header.pack_start(Gtk.Button(icon_name="go-previous-symbolic", action_name="win.new-scan",
                                      tooltip_text=_("New scan") + " (Ctrl+N)"))
         header.pack_end(Gtk.Button(icon_name="view-refresh-symbolic", action_name="win.rescan",
                                    tooltip_text=_("Rescan") + " (F5)"))
-        self.title = Adw.WindowTitle(title="Janitux")
-        header.set_title_widget(self.title)
 
         self.columns = ColumnBrowser(self._on_select, self._on_activate, self._on_context_menu)
         self.inspector = Inspector(self._navigate)
@@ -130,14 +137,14 @@ class Window(Adw.ApplicationWindow):
         if root is None:  # cancelled or failed: back to where we were
             self.pages.set_visible_child_name("results" if self.root else "start")
             if error is not None:
-                self.toast(str(error))
+                self.notify("dialog-error-symbolic", str(error))
             return
         # Rescanning the same folder keeps the current selection if it still exists.
         same = self.root is not None and self.root.path() == root.path()
         target = _find(root, self.selected.path()) if same and self.selected else root
         old, self.root = self.root, root
         if not same:
-            self.freed = 0
+            self.trashed = self.freed = 0
         self.columns.set_root(root)
         self.inspector.investigate(root)
         if not same:
@@ -147,8 +154,15 @@ class Window(Adw.ApplicationWindow):
         if old is not None:  # let the previous tree go, without blocking the UI
             threading.Thread(target=release, args=(old,), daemon=True).start()
             del old
+        self.notify("system-search-symbolic",
+                    plural(root.count, "Investigated {path}: {size} in {n} file",
+                           "Investigated {path}: {size} in {n} files",
+                           path=root.path(), size=size_text(root.size)),
+                    record=f"scan    {size_text(root.size):>10}  {root.path()} ({root.count:n} files)")
         if scanner.errors:
-            self.toast(_("{n} folders could not be read").format(n=scanner.errors))
+            self.notify("dialog-warning-symbolic",
+                        plural(scanner.errors, "{n} folder could not be read",
+                               "{n} folders could not be read"))
 
     def _cancel_scan(self):
         if self.scanner is not None:
@@ -212,11 +226,13 @@ class Window(Adw.ApplicationWindow):
     def _update_title(self):
         if self.root is None:
             return
-        subtitle = f"{size_text(self.root.size)} · " + _("{n} files").format(n=f"{self.root.count:n}")
+        parts = [size_text(self.root.size), plural(self.root.count, "{n} file", "{n} files")]
+        if self.trashed:
+            parts.append(_("{size} moved to trash").format(size=size_text(self.trashed)))
         if self.freed:
-            subtitle += " · " + _("freed {size}").format(size=size_text(self.freed))
+            parts.append(_("freed {size}").format(size=size_text(self.freed)))
         self.title.set_title(self.root.path())
-        self.title.set_subtitle(subtitle)
+        self.title.set_subtitle(" · ".join(parts))
 
     def _update_actions(self):
         on_results = self.pages.get_visible_child_name() == "results"
@@ -227,11 +243,17 @@ class Window(Adw.ApplicationWindow):
                               ("up", has and self.selected.parent is not None),
                               ("rescan", on_results and not self.busy),
                               ("rescan-folder", has and not self.busy),
-                              ("new-scan", on_results)):
+                              ("new-scan", on_results), ("empty-trash", not self.busy)):
             self.lookup_action(name).set_enabled(enabled)
 
-    def toast(self, text):
-        self.toasts.add_toast(Adw.Toast(title=GLib.markup_escape_text(text), timeout=4))
+    def notify(self, icon, text, record=None):
+        """Show a message in the header bar for a few seconds and keep it in the
+        activity log; `record` also goes to the log file (destructive actions)."""
+        self.log.add(icon, text, record)
+        page = self.pages.get_visible_child_name()
+        title = {"results": self.title, "start": self.start_page.title}.get(page)
+        if title is not None:
+            title.flash(icon, text)
 
     # -- actions on the selection ----------------------------------------------
     def _file(self):
@@ -251,11 +273,11 @@ class Window(Adw.ApplicationWindow):
             finish(result)
         except GLib.Error as exc:
             if not exc.matches(Gtk.dialog_error_quark(), Gtk.DialogError.DISMISSED):
-                self.toast(exc.message)
+                self.notify("dialog-error-symbolic", exc.message)
 
     def _copy_path(self):
-        self.get_clipboard().set_text(self.selected.path())
-        self.toast(_("Path copied"))
+        self.get_clipboard().set_content(Gdk.ContentProvider.new_for_value(self.selected.path()))
+        self.notify("edit-copy-symbolic", _("Path copied"))
 
     def _set_busy(self, busy):
         self.busy = busy
@@ -275,7 +297,7 @@ class Window(Adw.ApplicationWindow):
         except GLib.Error as exc:
             self._ask_delete(node, _("Could not move to trash"), exc.message)
             return
-        self._removed(node, _("Moved “{name}” to trash ({size})"))
+        self._removed(node, "trash")
 
     def _confirm_delete(self):
         node = self.selected
@@ -284,8 +306,9 @@ class Window(Adw.ApplicationWindow):
         self._ask_delete(node, _("Delete “{name}” permanently?").format(name=node.name))
 
     def _ask_delete(self, node, heading, reason=None):
-        body = _("{size} in {n} files will be removed. This cannot be undone.").format(
-            size=size_text(node.size), n=f"{node.count:n}")
+        body = plural(node.count, "{size} in {n} file will be removed. This cannot be undone.",
+                      "{size} in {n} files will be removed. This cannot be undone.",
+                      size=size_text(node.size))
         if reason:
             body = f"{reason}.\n\n{body}"
         dialog = Adw.AlertDialog(heading=heading, body=body)
@@ -314,27 +337,98 @@ class Window(Adw.ApplicationWindow):
         def done(ok):
             self._set_busy(False)
             if ok:
-                self._removed(node, _("Deleted “{name}” ({size})"))
+                self._removed(node, "delete")
             else:
-                self.toast(_("Some items could not be deleted"))
+                self.notify("dialog-warning-symbolic", _("Some items could not be deleted"))
                 if node.is_dir:  # partly deleted: look again at what is left
                     self._rescan_node(node)
         threading.Thread(target=work, daemon=True).start()
 
-    def _removed(self, node, message):
+    def _removed(self, node, how):
+        """`node` left the disk: moved to the trash (how="trash") or deleted."""
         parent = node.parent
         if parent is None:  # already gone from the tree
             return
-        self.freed += node.size
-        self.toast(message.format(name=node.name, size=size_text(node.size)))
+        name, size, path = node.name, node.size, node.path()
+        if how == "trash":
+            self.trashed += size
+            icon, text = "user-trash-symbolic", _("Moved “{name}” to trash ({size})")
+        else:
+            self.freed += size
+            icon, text = "edit-delete-symbolic", _("Deleted “{name}” ({size})")
         detach(node)
         self._rebuild(parent)
+        self.notify(icon, text.format(name=name, size=size_text(size)),
+                    record=f"{how:<7} {size_text(size):>10}  {path}")
+
+    # -- the trash ----------------------------------------------------------------
+    def _ask_empty_trash(self):
+        """Empty every trash folder, after the user types the confirmation word."""
+        if self.busy:
+            return
+        dirs = trash_dirs()
+
+        def measure():
+            GLib.idle_add(ask, *measure_trash(dirs))
+
+        def ask(size, items):
+            if not items:
+                self.notify("user-trash-symbolic", _("The trash is already empty"))
+                return
+            word = _("empty")
+            dialog = Adw.AlertDialog(
+                heading=_("Empty the trash?"),
+                body=plural(items, "{n} item, {size}, will be deleted for good. This cannot be undone.",
+                            "{n} items, {size} in all, will be deleted for good. This cannot be undone.",
+                            size=size_text(size))
+                + "\n\n" + _("Type “{word}” to confirm.").format(word=word))
+            entry = Gtk.Entry(placeholder_text=word, activates_default=True)
+            dialog.set_extra_child(entry)
+            dialog.add_response("cancel", _("Cancel"))
+            dialog.add_response("empty", _("Empty trash"))
+            dialog.set_response_appearance("empty", Adw.ResponseAppearance.DESTRUCTIVE)
+            dialog.set_response_enabled("empty", False)  # until the word is typed
+            dialog.set_default_response("empty")
+            dialog.set_close_response("cancel")
+            entry.connect("changed", lambda e: dialog.set_response_enabled(
+                "empty", e.get_text().strip().casefold() == word.casefold()))
+            dialog.connect("response", lambda _d, r: r == "empty" and self._empty_trash(dirs))
+            dialog.present(self)
+            entry.grab_focus()
+        threading.Thread(target=measure, daemon=True).start()
+
+    def _empty_trash(self, dirs):
+        self._set_busy(True)
+
+        def work():
+            before = measure_trash(dirs)[0]
+            failed = empty_trash(dirs)
+            GLib.idle_add(done, before - measure_trash(dirs)[0], failed)
+
+        def done(freed, failed):
+            self._set_busy(False)
+            self.freed += freed
+            self.trashed = 0
+            self.notify("user-trash-full-symbolic",
+                        _("Emptied the trash: {size} freed").format(size=size_text(freed)),
+                        record=f"empty   {size_text(freed):>10}  {', '.join(dirs)}")
+            if failed:
+                self.notify("dialog-warning-symbolic",
+                            plural(failed, "{n} item could not be deleted",
+                                   "{n} items could not be deleted"))
+            self.start_page.refresh_trash()
+            self._update_title()
+            for trash in dirs:  # the scanned tree may hold a trash folder: look again
+                node = _find(self.root, trash) if self.root else None
+                if node is not None and node.path() == trash:
+                    self._rescan_node(node, count_freed=False)
+        threading.Thread(target=work, daemon=True).start()
 
     def _rescan_folder(self):
         node = self.selected
         self._rescan_node(node if node.is_dir else node.parent)
 
-    def _rescan_node(self, node):
+    def _rescan_node(self, node, count_freed=True):
         if node.parent is None:
             self.scan(node.path())
             return
@@ -356,14 +450,16 @@ class Window(Adw.ApplicationWindow):
                 return
             if fresh is None:
                 if os.path.lexists(path):  # still there, just unreadable
-                    self.toast(str(error))
+                    self.notify("dialog-error-symbolic", str(error))
                     return
-                self.freed += node.size  # the folder itself is gone
+                if count_freed:
+                    self.freed += node.size  # the folder itself is gone
                 detach(node)
                 self._rebuild(parent)
                 return
             replace(node, fresh)
-            self.freed += max(0, old_size - fresh.size)
+            if count_freed:
+                self.freed += max(0, old_size - fresh.size)
             self._rebuild(fresh)
         threading.Thread(target=work, daemon=True).start()
 

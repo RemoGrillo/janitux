@@ -28,7 +28,7 @@ ICONS = (
     "audio-x-generic-symbolic",
     "package-x-generic-symbolic",
     "x-office-document-symbolic",
-    "text-x-script-symbolic",
+    "utilities-terminal-symbolic",  # in both Adwaita and Breeze
     "application-x-executable-symbolic",
     "text-x-generic-symbolic",
 )

@@ -8,7 +8,7 @@ from gi.repository import Gtk, Pango
 from . import kinds
 from .columns import ShareBar
 from .common import color_of, icon_for, percent, size_text
-from .i18n import _
+from .i18n import _, plural
 from .suspects import explained, find_suspects
 
 MONTH = 30.44 * 86400
@@ -25,7 +25,7 @@ def clues(suspect):
     if node.children is None:
         found.append(_("single file"))
     else:
-        found.append(_("{n} files").format(n=f"{node.count:n}"))
+        found.append(plural(node.count, "{n} file", "{n} files"))
         vector = node.kind_vector()
         kind = node.kind()
         if kind != kinds.OTHER and vector[kind] >= 0.7 * max(1, sum(vector)):
@@ -71,9 +71,10 @@ class Lineup(Gtk.Box):
         if not suspects:
             self.summary.set_label(_("No suspects: nothing here is big enough to worry about."))
             return
-        self.summary.set_label(_("{n} suspects hold {size}, {pct} of the scanned space").format(
-            n=len(suspects), size=size_text(explained(suspects)),
-            pct=percent(explained(suspects), root.size)))
+        self.summary.set_label(plural(
+            len(suspects), "{n} suspect holds {size}, {pct} of the scanned space",
+            "{n} suspects hold {size}, {pct} of the scanned space",
+            size=size_text(explained(suspects)), pct=percent(explained(suspects), root.size)))
         top = suspects[0].score
         for rank, suspect in enumerate(suspects, 1):
             self.list.append(self._row(rank, suspect, top))

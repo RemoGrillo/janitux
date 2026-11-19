@@ -33,6 +33,8 @@ look at the **treemap**, and move the culprits to the trash.
 - **Treemap and sunburst** of the selected folder. Hover to highlight, click to zoom in.
 - **Colors by content**: video, images, audio, archives, documents, code, programs, with a breakdown for every folder.
 - **Safe cleaning**: Delete moves to the trash, Shift+Delete deletes for good (it always asks first).
+- **Empty the trash** from the start page or the menu: you confirm by typing a word, so it never happens by accident.
+- **Activity log**: messages show up in the header bar, never over the buttons; the Activity button keeps them all, and every scan and deletion is written to `~/.local/state/janitux/activity.log`.
 - **Quick hints**: a `cache` badge marks folders that only hold rebuildable data (`.cache`, `node_modules`, `__pycache__`…).
 - **Fast and light**: about 250 000 files a second, sizes identical to `du`, hard links counted once. Dependencies: GTK and nothing else.
 - English and Italian.
@@ -42,7 +44,7 @@ look at the **treemap**, and move the culprits to the trash.
 | ![Treemap view](docs/screenshots/treemap.png) | ![Sunburst view in the light theme](docs/screenshots/sunburst.png) |
 
 <details>
-<summary>Start page: every disk and how full it is</summary>
+<summary>Start page: every disk, how full it is, and the trash</summary>
 
 ![Start page](docs/screenshots/start.png)
 

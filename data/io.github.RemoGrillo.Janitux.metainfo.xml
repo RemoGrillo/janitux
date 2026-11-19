@@ -20,6 +20,8 @@
       <li>Interactive treemap and sunburst of the selected folder</li>
       <li>Breakdown by kind of content: video, images, audio, archives, code…</li>
       <li>Moves to the trash by default; permanent deletion asks first</li>
+      <li>Empties the trash, after you type a confirmation word</li>
+      <li>Activity log of every scan and deletion, also kept in a file</li>
       <li>Fast multi-threaded scan, hard links counted once</li>
     </ul>
   </description>
@@ -61,6 +63,17 @@
     <color type="primary" scheme_preference="dark">#184f95</color>
   </branding>
   <releases>
+    <release version="0.3.0" date="2026-11-19">
+      <description>
+        <ul>
+          <li>Empty the trash from the start page or the menu; you confirm by typing a word</li>
+          <li>Messages appear in the header bar instead of covering the buttons</li>
+          <li>Activity log in the header bar, and a log file of scans and deletions</li>
+          <li>The header tells what went to the trash apart from what was really freed</li>
+          <li>Fixed: copying a path to the clipboard</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.2.0" date="2026-11-19">
       <description>
         <ul>

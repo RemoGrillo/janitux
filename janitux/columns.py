@@ -9,7 +9,7 @@ from gi.repository import Gdk, GLib, Graphene, Gtk, Pango
 
 from .charts import rect, rgba
 from .common import color_of, icon_for, percent, size_text
-from .i18n import _
+from .i18n import _, plural
 from .scanner import OTHER_FS, UNREADABLE
 from .suspects import is_cache
 
@@ -63,7 +63,7 @@ class Row(Gtk.Box):
         self.arrow.set_opacity(1 if node.is_dir and node.children else 0)
         tip = f"{node.name}\n{size_text(node.size)} · {percent(node.size, folder.size)}"
         if node.is_dir:
-            tip += " · " + _("{n} files").format(n=f"{node.count:n}")
+            tip += " · " + plural(node.count, "{n} file", "{n} files")
         if node.flags & OTHER_FS:
             tip += "\n" + _("not scanned: other filesystem")
         elif node.flags & UNREADABLE:

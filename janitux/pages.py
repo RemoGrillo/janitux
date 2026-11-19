@@ -2,14 +2,15 @@
 
 import os
 import re
+import threading
 
-from gi.repository import Adw, GLib, Gtk, Pango
+from gi.repository import Adw, Gio, GLib, Gtk, Pango
 
 from . import APP_ID
+from .activity import ActivityButton, HeaderTitle
 from .common import size_text
-from .i18n import TAGLINE, _
-
-SKIP_MOUNTS = ("/boot", "/efi", "/snap/", "/var/lib/snapd")
+from .i18n import TAGLINE, _, plural
+from .places import measure_trash, mounts, trash_dirs
 
 
 def _labels():
@@ -29,19 +30,7 @@ def locations():
     home = GLib.get_home_dir()
     found = [(home, _("Home folder"), home, "user-home-symbolic")]
     labels = _labels()
-    seen = set()
-    try:
-        with open("/proc/self/mounts", encoding="utf-8") as mounts:
-            lines = mounts.readlines()
-    except OSError:
-        lines = []
-    for line in lines:
-        device, mount, fstype = line.split()[:3]
-        mount = re.sub(r"\\([0-7]{3})", lambda m: chr(int(m.group(1), 8)), mount)
-        if (not device.startswith("/dev/") or device.startswith("/dev/loop")
-                or fstype == "squashfs" or mount.startswith(SKIP_MOUNTS) or device in seen):
-            continue
-        seen.add(device)
+    for device, mount, fstype in mounts():
         real = os.path.realpath(device)
         icon = "media-removable-symbolic" if mount.startswith(("/run/media", "/media")) \
             else "drive-harddisk-symbolic"
@@ -59,22 +48,25 @@ def _usage(path):
     return st.f_blocks * st.f_frsize, st.f_bavail * st.f_frsize
 
 
-def header_with_menu():
-    header = Adw.HeaderBar()
-    menu = Gtk.Builder.new_from_string("""
-    <interface><menu id="m"><section>
-      <item><attribute name="label">{}</attribute><attribute name="action">app.about</attribute></item>
-    </section></menu></interface>""".format(GLib.markup_escape_text(_("About Janitux"))), -1)
-    header.pack_end(Gtk.MenuButton(icon_name="open-menu-symbolic",
-                                   menu_model=menu.get_object("m")))
+def header_with_menu(log, title):
+    """Header bar with a title that can flash messages, the activity log and the menu."""
+    header = Adw.HeaderBar(title_widget=title)
+    menu = Gio.Menu()
+    menu.append(_("Empty trash…"), "win.empty-trash")
+    about = Gio.Menu()
+    about.append(_("About Janitux"), "app.about")
+    menu.append_section(None, about)
+    header.pack_end(Gtk.MenuButton(icon_name="open-menu-symbolic", menu_model=menu))
+    header.pack_end(ActivityButton(log))
     return header
 
 
 class StartPage(Adw.Bin):
-    def __init__(self, on_scan, on_choose):
+    def __init__(self, on_scan, on_choose, log):
         super().__init__()
         view = Adw.ToolbarView()
-        view.add_top_bar(header_with_menu())
+        self.title = HeaderTitle("Janitux")
+        view.add_top_bar(header_with_menu(log, self.title))
         self.set_child(view)
         self.on_scan = on_scan
         self.places = Adw.PreferencesGroup(title=_("Locations"))
@@ -92,9 +84,19 @@ class StartPage(Adw.Bin):
         options = Adw.PreferencesGroup()
         options.add(self.one_fs)
 
+        self.trash = Adw.ActionRow(title=_("Trash"), subtitle=_("Measuring…"))
+        self.trash.add_prefix(Gtk.Image(icon_name="user-trash-symbolic"))
+        self.empty = Gtk.Button(label=_("Empty…"), action_name="win.empty-trash",
+                                valign=Gtk.Align.CENTER, sensitive=False)
+        self.empty.add_css_class("destructive-action")
+        self.trash.add_suffix(self.empty)
+        trash = Adw.PreferencesGroup()
+        trash.add(self.trash)
+
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
         box.append(self.places)
         box.append(self.choose)
+        box.append(trash)
         box.append(options)
         theme = Gtk.IconTheme.get_for_display(self.get_display())
         status = Adw.StatusPage(
@@ -109,7 +111,25 @@ class StartPage(Adw.Bin):
     def one_filesystem(self):
         return self.one_fs.get_active()
 
+    def refresh_trash(self):
+        """Measure the trash in the background and show it."""
+        self.trash.set_subtitle(_("Measuring…"))
+
+        def measure():
+            size, items = measure_trash(trash_dirs())
+            GLib.idle_add(show, size, items)
+
+        def show(size, items):
+            if items:
+                self.trash.set_subtitle(plural(items, "{size} in {n} item", "{size} in {n} items",
+                                              size=size_text(size)))
+            else:
+                self.trash.set_subtitle(_("The trash is empty"))
+            self.empty.set_sensitive(items > 0)
+        threading.Thread(target=measure, daemon=True).start()
+
     def refresh(self):
+        self.refresh_trash()
         for row in self._rows:
             self.places.remove(row)
         self._rows = []
@@ -170,5 +190,5 @@ class ScanPage(Adw.Bin):
 
     def update(self, size, files, current):
         self.size.set_label(size_text(size))
-        self.files.set_label(_("{n} files").format(n=f"{files:n}"))
+        self.files.set_label(plural(files, "{n} file", "{n} files"))
         self.current.set_label(current)

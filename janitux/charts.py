@@ -13,7 +13,7 @@ from gi.repository import Adw, Gdk, Graphene, Gsk, Gtk, Pango
 
 from . import kinds
 from .common import display_name, palette, percent, size_text
-from .i18n import _
+from .i18n import _, plural
 from .scanner import Node
 
 ANIMATION_US = 450_000
@@ -282,7 +282,7 @@ class Sunburst(Chart):
         else:
             shown = self.hover if isinstance(self.hover, Node) else self.focus
             if shown is self.focus:
-                detail = _("{n} files").format(n=f"{shown.count:n}")
+                detail = plural(shown.count, "{n} file", "{n} files")
             else:
                 detail = percent(shown.size, self.focus.size)
             lines = [f"<span size='small' weight='bold'>{escape(display_name(shown))}</span>",
@@ -453,7 +453,7 @@ class Treemap(Chart):
                 snapshot.append_fill(_rounded_path(x, y, w, h, self.RADIUS),
                                      Gsk.FillRule.WINDING, rgba(ink_rgb, 0.08))
                 if w > 80 and h > 22:
-                    label = escape(_("{n} more items").format(n=box.rest))
+                    label = escape(plural(box.rest, "{n} more item", "{n} more items"))
                     self.text(snapshot, f"<span size='small'>{label}</span>",
                               x + 6, y + 3, w - 12, rgba(ink_rgb, 0.6))
                 continue

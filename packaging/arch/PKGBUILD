@@ -4,7 +4,7 @@
 # working tree (makepkg finds the local tarball first and skips the checksum).
 
 pkgname=janitux
-pkgver=0.2.0
+pkgver=0.3.0
 pkgrel=1
 pkgdesc="Disk janitor: finds the main suspects filling your disk, with size-sorted columns, treemap and sunburst"
 arch=(any)

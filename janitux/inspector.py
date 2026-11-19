@@ -7,7 +7,7 @@ from gi.repository import Adw, Gio, GLib, Gtk, Pango
 from . import kinds
 from .charts import Chart, Sunburst, Treemap, rect, rgba, rounded_rect
 from .common import display_name, icon_for, palette, percent, size_text
-from .i18n import _
+from .i18n import _, plural
 from .lineup import Lineup
 
 
@@ -180,7 +180,7 @@ class Inspector(Gtk.Box):
         self.path.set_tooltip_text(node.path())
         parts = []
         if node.is_dir:
-            parts.append(_("{n} files").format(n=f"{node.count:n}"))
+            parts.append(plural(node.count, "{n} file", "{n} files"))
         if node.parent is not None:
             parts.append(_("{pct} of folder").format(pct=percent(node.size, node.parent.size)))
             parts.append(_("{pct} of total").format(pct=percent(node.size, self.root.size)))
