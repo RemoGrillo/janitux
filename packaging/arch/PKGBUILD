@@ -1,0 +1,25 @@
+# Maintainer: Remo Grillo <grilloremo at gmail dot com>
+#
+# AUR-ready. `make arch` in the source tree builds this same recipe from the
+# working tree (makepkg finds the local tarball first and skips the checksum).
+
+pkgname=janitux
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Find out what is eating your disk: size-sorted column browser, sunburst and treemap"
+arch=(any)
+url="https://github.com/RemoGrillo/janitux"
+license=(GPL-3.0-or-later)
+depends=(python python-gobject gtk4 libadwaita)
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+check() {
+  cd "$pkgname-$pkgver"
+  python -m unittest discover -s tests -t .
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  make DESTDIR="$pkgdir" PREFIX=/usr install
+}

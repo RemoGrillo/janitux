@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.RemoGrillo.Janitux</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Janitux</name>
+  <summary>Find out what is eating your disk</summary>
+  <summary xml:lang="it">Scopri cosa occupa il tuo disco</summary>
+  <description>
+    <p>
+      Janitux scans a folder or a whole disk and shows everything in it sorted
+      by size, biggest first, at every level. Walk the tree column by column,
+      see where the space goes, and move what you no longer need to the trash.
+    </p>
+    <ul>
+      <li>Column browser: each folder opens to the right, always sorted by size</li>
+      <li>Interactive sunburst and treemap of the selected folder</li>
+      <li>Breakdown by kind of content: video, images, audio, archives, code…</li>
+      <li>Moves to the trash by default; permanent deletion asks first</li>
+      <li>Fast multi-threaded scan, hard links counted once</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.RemoGrillo.Janitux.desktop</launchable>
+  <developer id="io.github.remogrillo">
+    <name>Remo Grillo</name>
+  </developer>
+  <url type="homepage">https://github.com/RemoGrillo/janitux</url>
+  <url type="bugtracker">https://github.com/RemoGrillo/janitux/issues</url>
+  <url type="vcs-browser">https://github.com/RemoGrillo/janitux</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/RemoGrillo/janitux/main/docs/screenshots/sunburst.png</image>
+      <caption>Columns sorted by size, with the sunburst of the selected folder</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/RemoGrillo/janitux/main/docs/screenshots/treemap.png</image>
+      <caption>Treemap view</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/RemoGrillo/janitux/main/docs/screenshots/start.png</image>
+      <caption>Start page with every disk and how full it is</caption>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+  <branding>
+    <color type="primary" scheme_preference="light">#9ec5f4</color>
+    <color type="primary" scheme_preference="dark">#184f95</color>
+  </branding>
+  <releases>
+    <release version="0.1.0" date="2026-11-19">
+      <description>
+        <p>First release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

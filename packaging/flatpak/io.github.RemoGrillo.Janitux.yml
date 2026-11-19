@@ -1,0 +1,28 @@
+# Build and install for the current user:   make flatpak && flatpak install --user dist/janitux-*.flatpak
+# (needs flatpak-builder and the Flathub remote, for the GNOME runtime)
+id: io.github.RemoGrillo.Janitux
+runtime: org.gnome.Platform
+runtime-version: '51'
+sdk: org.gnome.Sdk
+command: janitux
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # A disk cleaner has to see, and remove, files anywhere on the host.
+  # (Moving to trash goes through the trash portal automatically.)
+  - --filesystem=host
+modules:
+  - name: janitux
+    buildsystem: simple
+    build-commands:
+      - make install PREFIX=/app SHEBANG=/usr/bin/python3
+    sources:
+      - type: dir
+        path: ../..
+        skip:
+          - .git
+          - build
+          - dist
+          - .flatpak-builder

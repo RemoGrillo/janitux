@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3a42"/>
+      <stop offset="1" stop-color="#1e1e24"/>
+    </linearGradient>
+    <linearGradient id="hole" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#d9d9e0"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="116" height="116" rx="26" fill="url(#bg)"/>
+  <rect x="6.5" y="6.5" width="115" height="115" rx="25.5" fill="none" stroke="#ffffff" stroke-opacity="0.08"/>
+  <path d="M65.95 31.06A33 33 0 0 1 87.98 86.68L79.26 78.43A21 21 0 0 0 65.24 43.04Z" fill="#3987e5" opacity="1"/>
+  <path d="M85.13 89.35A33 33 0 0 1 42.87 89.35L50.56 80.13A21 21 0 0 0 77.44 80.13Z" fill="#eda100" opacity="1"/>
+  <path d="M40.02 86.68A33 33 0 0 1 32.07 55.68L43.68 58.70A21 21 0 0 0 48.74 78.43Z" fill="#eb6834" opacity="1"/>
+  <path d="M33.27 51.96A33 33 0 0 1 46.42 36.07L52.81 46.23A21 21 0 0 0 44.45 56.34Z" fill="#1baf7a" opacity="1"/>
+  <path d="M49.84 34.19A33 33 0 0 1 62.05 31.06L62.76 43.04A21 21 0 0 0 54.99 45.03Z" fill="#9085e9" opacity="1"/>
+  <path d="M65.80 19.04A45 45 0 0 1 107.83 53.81L98.09 56.07A35 35 0 0 0 65.40 29.03Z" fill="#3987e5" opacity="0.92"/>
+  <path d="M108.50 57.34A45 45 0 0 1 104.27 84.08L95.32 79.62A35 35 0 0 0 98.61 58.82Z" fill="#3987e5" opacity="0.92"/>
+  <path d="M93.47 98.01A45 45 0 0 1 51.82 107.32L54.52 97.69A35 35 0 0 0 86.92 90.45Z" fill="#eda100" opacity="0.92"/>
+  <path d="M31.91 95.55A45 45 0 0 1 20.17 74.19L29.91 71.93A35 35 0 0 0 39.04 88.54Z" fill="#eb6834" opacity="0.92"/>
+  <path d="M19.50 70.66A45 45 0 0 1 19.50 57.34L29.39 58.82A35 35 0 0 0 29.39 69.18Z" fill="#eb6834" opacity="0.92"/>
+  <path d="M21.79 48.39A45 45 0 0 1 29.99 34.53L37.55 41.08A35 35 0 0 0 31.17 51.86Z" fill="#1baf7a" opacity="0.92"/>
+  <path d="M43.92 23.73A45 45 0 0 1 53.81 20.17L56.07 29.91A35 35 0 0 0 48.38 32.68Z" fill="#9085e9" opacity="0.92"/>
+  <path d="M65.71 10.03A54 54 0 0 1 104.50 28.28L99.25 32.91A47 47 0 0 0 65.49 17.02Z" fill="#3987e5" opacity="0.8"/>
+  <path d="M99.70 104.52A54 54 0 0 1 75.79 116.70L74.26 109.87A47 47 0 0 0 95.07 99.26Z" fill="#eda100" opacity="0.8"/>
+  <path d="M25.81 102.17A54 54 0 0 1 15.89 88.53L22.13 85.35A47 47 0 0 0 30.76 97.23Z" fill="#eb6834" opacity="0.8"/>
+  <circle cx="64" cy="64" r="17" fill="url(#hole)"/>
+  <path d="M57 58.5h14M59.5 58.5l1 12h7l1-12M62 56.5h4" fill="none" stroke="#1e1e24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

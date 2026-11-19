@@ -1,0 +1,25 @@
+# .deb and .rpm from one file with nfpm (https://nfpm.goreleaser.com).
+# `make deb rpm` stages the install tree in build/staging and calls nfpm.
+name: janitux
+version: ${VERSION}
+arch: all
+platform: linux
+section: utils
+priority: optional
+maintainer: Remo Grillo <grilloremo@gmail.com>
+homepage: https://github.com/RemoGrillo/janitux
+license: GPL-3.0-or-later
+description: |
+  Find out what is eating your disk.
+  Janitux lists everything sorted by size, biggest first, at every level
+  (like OmniDiskSweeper), with sunburst and treemap views, and moves what
+  you no longer need to the trash.
+contents:
+  - src: build/staging/usr/
+    dst: /usr/
+    type: tree
+overrides:
+  deb:   # Debian 13+, Ubuntu 24.04+
+    depends: [python3, python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1]
+  rpm:   # Fedora 40+
+    depends: [python3, python3-gobject, gtk4, libadwaita]

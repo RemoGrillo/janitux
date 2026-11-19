@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=Janitux
+GenericName=Disk Usage Analyzer
+GenericName[it]=Analizzatore dell'uso del disco
+Comment=Find out what is eating your disk
+Comment[it]=Scopri cosa occupa il tuo disco
+Exec=janitux %f
+Icon=io.github.RemoGrillo.Janitux
+Terminal=false
+Categories=GTK;System;Filesystem;
+Keywords=disk;space;usage;storage;size;clean;cleaner;treemap;sunburst;
+Keywords[it]=disco;spazio;occupazione;dimensioni;pulizia;
+StartupNotify=true
