@@ -11,8 +11,9 @@ permissions:
   contents: read
 
 env:
-  # Ubuntu mirrors hiccup now and then: retry downloads instead of failing.
-  APT: sudo apt-get -o Acquire::Retries=5
+  # Fresh runners: retry flaky mirrors, and wait for the dpkg lock that
+  # unattended upgrades may hold right after boot instead of failing.
+  APT: sudo apt-get -o Acquire::Retries=5 -o DPkg::Lock::Timeout=600
 
 jobs:
   test:
